@@ -21,7 +21,7 @@ const vendorProfileSchema = new Schema<IVendorProfile>(
       type: Schema.Types.ObjectId,
       ref: 'User',
       required: true,
-      unique: true, // enforces the one-to-one relationship with User
+      unique: true, 
     },
     storeName: {
       type: String,
