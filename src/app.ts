@@ -4,6 +4,7 @@ import cookieParser from 'cookie-parser';
 import { env } from '@config/env';
 import { errorMiddleware } from '@middlewares/error.middleware';
 import { ApiError } from '@utils/ApiError';
+import authRoutes from '@modules/auth/auth.routes';
 
 export function createApp(): Application {
   const app = express();
@@ -21,6 +22,8 @@ export function createApp(): Application {
   app.get('/api/v1/health', (_req: Request, res: Response) => {
     res.status(200).json({ success: true, message: 'API is healthy' });
   });
+
+  app.use('/api/v1/auth', authRoutes);
 
   app.use((req: Request, _res: Response) => {
     throw ApiError.notFound(`Route ${req.originalUrl} not found`);
