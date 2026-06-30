@@ -12,7 +12,7 @@ export interface ProductFilters {
 export interface PaginationOptions {
   page: number;
   limit: number;
-  sortBy: string; 
+  sortBy: string;
 }
 
 interface CreateProductInput {
@@ -44,7 +44,8 @@ export const productRepository = {
     pagination: PaginationOptions
   ): Promise<{ products: IProduct[]; total: number }> {
     const query: FilterQuery<IProduct> = {
-      status: filters.status ?? 'active', };
+      status: filters.status ?? 'active',
+    };
 
     if (filters.search) {
       query.$text = { $search: filters.search };
@@ -77,7 +78,7 @@ export const productRepository = {
     return Product.find({ vendorId }).sort('-createdAt').exec();
   },
 
-  async update(id: string, updates: Partial<IProduct>): Promise<IProduct | null> {
+  async update(id: string, updates: Record<string, unknown>): Promise<IProduct | null> {
     return Product.findByIdAndUpdate(id, updates, { new: true, runValidators: true }).exec();
   },
 
