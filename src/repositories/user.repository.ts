@@ -12,6 +12,14 @@ export const userRepository = {
     return User.create(data);
   },
 
+    async updateRole(userId: string, role: UserRole): Promise<IUser | null> {
+    return User.findByIdAndUpdate(userId, { role }, { new: true }).exec();
+  },
+
+  async findAll(): Promise<IUser[]> {
+    return User.find().select('-passwordHash').exec();
+  },
+
   async findByEmail(email: string, includePassword = false): Promise<IUser | null> {
     const query = User.findOne({ email });
     if (includePassword) query.select('+passwordHash');
