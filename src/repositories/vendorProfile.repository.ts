@@ -11,6 +11,20 @@ export const vendorProfileRepository = {
     return VendorProfile.create(data);
   },
 
+  async update(
+    id: string,
+    updates: Record<string, unknown>
+  ): Promise<IVendorProfile | null> {
+    return VendorProfile.findByIdAndUpdate(id, updates, {
+      new: true,
+      runValidators: true,
+    }).exec();
+  },
+
+  async findAll(): Promise<IVendorProfile[]> {
+    return VendorProfile.find().populate('userId', 'name email').exec();
+  },
+
   async findByUserId(userId: string): Promise<IVendorProfile | null> {
     return VendorProfile.findOne({ userId }).exec();
   },
@@ -31,7 +45,7 @@ export const vendorProfileRepository = {
     return VendorProfile.findByIdAndUpdate(
       id,
       { approvalStatus: status, rejectionReason: rejectionReason ?? undefined },
-      { new: true } 
+      { new: true }
     ).exec();
   },
 
