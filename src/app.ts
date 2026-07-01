@@ -7,6 +7,7 @@ import { ApiError } from '@utils/ApiError';
 import authRoutes from '@modules/auth/auth.routes';
 import productRoutes from '@modules/products/product.routes';
 import vendorRoutes from '@modules/vendors/vendor.routes';
+import cartRoutes from '@modules/cart/cart.routes';
 
 export function createApp(): Application {
   const app = express();
@@ -28,6 +29,7 @@ export function createApp(): Application {
   app.use('/api/v1/auth', authRoutes);
   app.use('/api/v1/products', productRoutes);
   app.use('/api/v1/vendors', vendorRoutes);
+  app.use('/api/v1/cart', cartRoutes);
 
   app.use((req: Request, _res: Response) => {
     throw ApiError.notFound(`Route ${req.originalUrl} not found`);
