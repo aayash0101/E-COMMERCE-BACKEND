@@ -5,6 +5,7 @@ export type PaymentStatus = 'pending' | 'paid' | 'failed' | 'refunded';
 export type OrderItemStatus = 'pending' | 'shipped' | 'delivered' | 'cancelled';
 
 interface IOrderItem {
+  _id?: Types.ObjectId;
   productId: Types.ObjectId;
   vendorId: Types.ObjectId; 
   name: string; 
