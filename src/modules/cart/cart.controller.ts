@@ -12,7 +12,7 @@ export const cartController = {
         const { productId, quantity } = req.body;
         const cart = await cartService.addItem(
             req.user!.userId,
-            req.user!.userId,
+            productId,        
             quantity
         );
         res.status(200).json({ success: true, data: { cart } });
