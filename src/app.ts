@@ -9,6 +9,7 @@ import productRoutes from '@modules/products/product.routes';
 import vendorRoutes from '@modules/vendors/vendor.routes';
 import cartRoutes from '@modules/cart/cart.routes';
 import orderRoutes from '@modules/orders/order.routes';
+import reviewRoutes from '@modules/reviews/review.routes';
 
 export function createApp(): Application {
   const app = express();
@@ -32,6 +33,7 @@ export function createApp(): Application {
   app.use('/api/v1/vendors', vendorRoutes);
   app.use('/api/v1/cart', cartRoutes);
   app.use('/api/v1/orders', orderRoutes);
+  app.use('/api/v1/reviews', reviewRoutes);
 
   app.use((req: Request, _res: Response) => {
     throw ApiError.notFound(`Route ${req.originalUrl} not found`);
