@@ -34,6 +34,10 @@ export const orderRepository = {
       .exec();
   },
 
+  async findByIdRaw(id: string): Promise<IOrder | null> {
+    return Order.findById(id).exec();
+  },
+
   async findByCustomerId(customerId: string): Promise<IOrder[]> {
     return Order.find({ customerId })
       .sort('-createdAt')

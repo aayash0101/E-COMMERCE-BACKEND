@@ -6,97 +6,101 @@ import { IReview } from '@models/review.model';
 import { CreateReviewInput, UpdateReviewInput } from './review.validation';
 
 export const reviewService = {
-  async create(
-    customerId: string,
-    input: CreateReviewInput
-  ): Promise<IReview> {
-    const product = await productRepository.findById(input.productId);
-    if (!product) throw ApiError.notFound('Product not found');
+    async create(
+        customerId: string,
+        input: CreateReviewInput
+    ): Promise<IReview> {
+        const product = await productRepository.findById(input.productId);
+        if (!product) throw ApiError.notFound('Product not found');
 
-    const order = await orderRepository.findById(input.orderId);
-    if (!order) throw ApiError.notFound('Order not found');
+        const order = await orderRepository.findById(input.orderId);
+        if (!order) throw ApiError.notFound('Order not found');
 
-    if (order.customerId.toString() !== customerId) {
-      throw ApiError.forbidden('This order does not belong to you');
-    }
+        const orderCustomerId =
+            typeof order.customerId === 'object' && '_id' in order.customerId
+                ? (order.customerId as { _id: { toString: () => string } })._id.toString()
+                : order.customerId.toString();
+        if (order.customerId.toString() !== customerId) {
+            throw ApiError.forbidden('This order does not belong to you');
+        }
 
-    const orderItem = order.items.find(
-      (item) => item.productId.toString() === input.productId
-    );
-    if (!orderItem) {
-      throw ApiError.badRequest(
-        'You can only review products you have ordered'
-      );
-    }
+        const orderItem = order.items.find(
+            (item) => item.productId.toString() === input.productId
+        );
+        if (!orderItem) {
+            throw ApiError.badRequest(
+                'You can only review products you have ordered'
+            );
+        }
 
-    
-    if (orderItem.itemStatus !== 'delivered') {
-      throw ApiError.badRequest(
-        'You can only review products that have been delivered'
-      );
-    }
 
-    const existingReview = await reviewRepository.findByCustomerAndProduct(
-      customerId,
-      input.productId
-    );
-    if (existingReview) {
-      throw ApiError.conflict('You have already reviewed this product');
-    }
+        if (orderItem.itemStatus !== 'delivered') {
+            throw ApiError.badRequest(
+                'You can only review products that have been delivered'
+            );
+        }
 
-    const review = await reviewRepository.create({
-      productId: input.productId,
-      customerId,
-      orderId: input.orderId,
-      rating: input.rating,
-      comment: input.comment,
-    });
+        const existingReview = await reviewRepository.findByCustomerAndProduct(
+            customerId,
+            input.productId
+        );
+        if (existingReview) {
+            throw ApiError.conflict('You have already reviewed this product');
+        }
 
-    await reviewRepository.recalculateProductRating(input.productId);
+        const review = await reviewRepository.create({
+            productId: input.productId,
+            customerId,
+            orderId: input.orderId,
+            rating: input.rating,
+            comment: input.comment,
+        });
 
-    return review;
-  },
+        await reviewRepository.recalculateProductRating(input.productId);
 
-  async getProductReviews(productId: string): Promise<IReview[]> {
-    const product = await productRepository.findById(productId);
-    if (!product) throw ApiError.notFound('Product not found');
+        return review;
+    },
 
-    return reviewRepository.findByProductId(productId);
-  },
+    async getProductReviews(productId: string): Promise<IReview[]> {
+        const product = await productRepository.findById(productId);
+        if (!product) throw ApiError.notFound('Product not found');
 
-  async update(
-    reviewId: string,
-    customerId: string,
-    input: UpdateReviewInput
-  ): Promise<IReview> {
-    const review = await reviewRepository.findById(reviewId);
-    if (!review) throw ApiError.notFound('Review not found');
+        return reviewRepository.findByProductId(productId);
+    },
 
-    if (review.customerId.toString() !== customerId) {
-      throw ApiError.forbidden('You can only edit your own reviews');
-    }
+    async update(
+        reviewId: string,
+        customerId: string,
+        input: UpdateReviewInput
+    ): Promise<IReview> {
+        const review = await reviewRepository.findById(reviewId);
+        if (!review) throw ApiError.notFound('Review not found');
 
-    const updated = await reviewRepository.update(reviewId, input);
-    if (!updated) throw ApiError.notFound('Review not found');
+        if (review.customerId.toString() !== customerId) {
+            throw ApiError.forbidden('You can only edit your own reviews');
+        }
 
-    await reviewRepository.recalculateProductRating(
-      review.productId.toString()
-    );
+        const updated = await reviewRepository.update(reviewId, input);
+        if (!updated) throw ApiError.notFound('Review not found');
 
-    return updated;
-  },
+        await reviewRepository.recalculateProductRating(
+            review.productId.toString()
+        );
 
-  async delete(reviewId: string, customerId: string): Promise<void> {
-    const review = await reviewRepository.findById(reviewId);
-    if (!review) throw ApiError.notFound('Review not found');
+        return updated;
+    },
 
-    if (review.customerId.toString() !== customerId) {
-      throw ApiError.forbidden('You can only delete your own reviews');
-    }
+    async delete(reviewId: string, customerId: string): Promise<void> {
+        const review = await reviewRepository.findById(reviewId);
+        if (!review) throw ApiError.notFound('Review not found');
 
-    const productId = review.productId.toString();
-    await reviewRepository.delete(reviewId);
+        if (review.customerId.toString() !== customerId) {
+            throw ApiError.forbidden('You can only delete your own reviews');
+        }
 
-    await reviewRepository.recalculateProductRating(productId);
-  },
+        const productId = review.productId.toString();
+        await reviewRepository.delete(reviewId);
+
+        await reviewRepository.recalculateProductRating(productId);
+    },
 };
