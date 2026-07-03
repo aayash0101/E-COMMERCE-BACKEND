@@ -4,6 +4,7 @@ import cookieParser from 'cookie-parser';
 import { env } from '@config/env';
 import { errorMiddleware } from '@middlewares/error.middleware';
 import { ApiError } from '@utils/ApiError';
+import path from 'path';
 import authRoutes from '@modules/auth/auth.routes';
 import productRoutes from '@modules/products/product.routes';
 import vendorRoutes from '@modules/vendors/vendor.routes';
@@ -28,6 +29,8 @@ export function createApp(): Application {
   app.get('/api/v1/health', (_req: Request, res: Response) => {
     res.status(200).json({ success: true, message: 'API is healthy' });
   });
+
+  app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
 
   app.use('/api/v1/auth', authRoutes);
   app.use('/api/v1/products', productRoutes);
