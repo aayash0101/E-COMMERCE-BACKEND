@@ -35,8 +35,8 @@ export const authController = {
     if (!token) {
       throw ApiError.unauthorized('No refresh token provided');
     }
-    const { accessToken } = await authService.refresh(token);
-    res.status(200).json({ success: true, data: { accessToken } });
+    const { accessToken, user } = await authService.refresh(token);
+    res.status(200).json({ success: true, data: { accessToken, user } });
   }),
 
   logout: asyncHandler(async (req: Request, res: Response) => {

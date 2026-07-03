@@ -67,28 +67,25 @@ export const authService = {
     return { user, ...tokens };
   },
 
-  async refresh(presentedToken: string): Promise<{ accessToken: string }> {
+  async refresh(presentedToken: string): Promise<{ accessToken: string; user: IUser }> {
     let payload: { userId: string };
     try {
       payload = verifyRefreshToken(presentedToken);
     } catch {
       throw ApiError.unauthorized('Invalid or expired refresh token');
     }
-
     const user = await userRepository.findById(payload.userId, true);
     if (!user || !user.refreshToken) {
       throw ApiError.unauthorized('Invalid refresh token');
     }
-
     if (hashToken(presentedToken) !== user.refreshToken) {
       throw ApiError.unauthorized('Invalid refresh token');
     }
-
     const accessToken = generateAccessToken({
       userId: user._id.toString(),
       role: user.role,
     });
-    return { accessToken };
+    return { accessToken, user };
   },
 
   async logout(userId: string): Promise<void> {

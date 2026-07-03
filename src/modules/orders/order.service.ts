@@ -64,16 +64,18 @@ export const orderService = {
     },
 
     async getOrderById(orderId: string, userId: string, role: string): Promise<IOrder> {
-        const order = await orderRepository.findById(orderId);
-        if (!order) throw ApiError.notFound('Order not found');
+        const rawOrder = await orderRepository.findByIdRaw(orderId);
+        if (!rawOrder) throw ApiError.notFound('Order not found');
 
         if (
             role === 'customer' &&
-            order.customerId.toString() !== userId
+            rawOrder.customerId.toString() !== userId
         ) {
             throw ApiError.forbidden('You do not have access to this order');
         }
 
+        const order = await orderRepository.findById(orderId);
+        if (!order) throw ApiError.notFound('Order not found');
         return order;
     },
 
@@ -110,11 +112,11 @@ export const orderService = {
         }
 
         const updated = await orderRepository.updateItemStatus(
-      orderId,
-      itemId,
-      status
-    );
-    if (!updated) throw ApiError.notFound('Order not found');
-    return updated;
-  },
+            orderId,
+            itemId,
+            status
+        );
+        if (!updated) throw ApiError.notFound('Order not found');
+        return updated;
+    },
 };
