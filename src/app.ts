@@ -31,7 +31,7 @@ export function createApp(): Application {
     res.status(200).json({ success: true, message: 'API is healthy' });
   });
 
-  app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
+  app.use('/uploads', express.static(path.join(__dirname, '..', 'public', 'uploads')));
 
   app.use('/api/v1/auth', authRoutes);
   app.use('/api/v1/products', productRoutes);
