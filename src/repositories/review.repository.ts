@@ -1,3 +1,4 @@
+import { Types } from 'mongoose';
 import { Review, IReview } from '@models/review.model';
 import { Product } from '@models/product.model';
 
@@ -11,25 +12,21 @@ export const reviewRepository = {
   }): Promise<IReview> {
     return Review.create(data);
   },
-
   async findById(id: string): Promise<IReview | null> {
     return Review.findById(id).exec();
   },
-
   async findByProductId(productId: string): Promise<IReview[]> {
     return Review.find({ productId })
       .populate('customerId', 'name')
       .sort('-createdAt')
       .exec();
   },
-
   async findByCustomerAndProduct(
     customerId: string,
     productId: string
   ): Promise<IReview | null> {
     return Review.findOne({ customerId, productId }).exec();
   },
-
   async update(
     id: string,
     updates: { rating?: number; comment?: string }
@@ -39,14 +36,12 @@ export const reviewRepository = {
       runValidators: true,
     }).exec();
   },
-
   async delete(id: string): Promise<void> {
     await Review.findByIdAndDelete(id).exec();
   },
-
   async recalculateProductRating(productId: string): Promise<void> {
     const result = await Review.aggregate([
-      { $match: { productId: productId } },
+      { $match: { productId: new Types.ObjectId(productId) } },
       {
         $group: {
           _id: '$productId',
@@ -55,7 +50,6 @@ export const reviewRepository = {
         },
       },
     ]);
-
     if (result.length > 0) {
       await Product.findByIdAndUpdate(productId, {
         averageRating: Math.round(result[0].averageRating * 10) / 10,
