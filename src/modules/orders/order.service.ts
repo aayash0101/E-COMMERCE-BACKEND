@@ -92,31 +92,39 @@ export const orderService = {
     },
 
     async updateItemStatus(
-        orderId: string,
-        itemId: string,
-        vendorId: string,
-        status: string
-    ): Promise<IOrder> {
-        const order = await orderRepository.findById(orderId);
-        if (!order) throw ApiError.notFound('Order not found');
+    orderId: string,
+    itemId: string,
+    vendorId: string,
+    status: string
+  ): Promise<IOrder> {
+    const order = await orderRepository.findById(orderId);
+    if (!order) throw ApiError.notFound('Order not found');
+    const item = order.items.find(
+      (i) => i._id?.toString() === itemId &&
+        i.vendorId.toString() === vendorId
+    );
+    if (!item) {
+      throw ApiError.forbidden(
+        'This item does not belong to your store'
+      );
+    }
 
-        const item = order.items.find(
-            (i) => i._id?.toString() === itemId &&
-                i.vendorId.toString() === vendorId
-        );
+    let updated = await orderRepository.updateItemStatus(
+      orderId,
+      itemId,
+      status
+    );
+    if (!updated) throw ApiError.notFound('Order not found');
 
-        if (!item) {
-            throw ApiError.forbidden(
-                'This item does not belong to your store'
-            );
-        }
+    if (
+      updated.paymentMethod === 'cash_on_delivery' &&
+      updated.paymentStatus !== 'paid' &&
+      updated.items.every((i) => i.itemStatus === 'delivered')
+    ) {
+      const withPayment = await orderRepository.updatePaymentStatus(orderId, 'paid');
+      if (withPayment) updated = withPayment;
+    }
 
-        const updated = await orderRepository.updateItemStatus(
-            orderId,
-            itemId,
-            status
-        );
-        if (!updated) throw ApiError.notFound('Order not found');
-        return updated;
-    },
+    return updated;
+  },
 };
