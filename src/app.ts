@@ -18,11 +18,21 @@ export function createApp(): Application {
   const app = express();
 
   app.use(
-    cors({
-      origin: env.clientUrl,
-      credentials: true,
-    })
-  );
+  cors({
+    origin: (origin, callback) => {
+      const allowedOrigins = [
+        env.clientUrl,
+        'http://localhost:5173',
+      ];
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error(`CORS policy does not allow origin: ${origin}`));
+      }
+    },
+    credentials: true,
+  })
+);
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
   app.use(cookieParser());
