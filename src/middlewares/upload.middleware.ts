@@ -1,15 +1,15 @@
 import multer from 'multer';
-import path from 'path';
+import { CloudinaryStorage } from 'multer-storage-cloudinary';
 import { Request } from 'express';
+import { cloudinary } from '@config/cloudinary';
 
-const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => {
-    cb(null, path.join(process.cwd(), 'public', 'uploads', 'products'));
-  },
-  filename: (_req, file, cb) => {
-    const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
-    cb(null, `${uniqueSuffix}${path.extname(file.originalname)}`);
-  },
+const storage = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder: 'marketplace/products',
+    allowed_formats: ['jpeg', 'jpg', 'png', 'webp'],
+    transformation: [{ width: 1600, height: 1600, crop: 'limit' }],
+  } as never, // multer-storage-cloudinary's types lag behind the actual Cloudinary options it accepts
 });
 
 const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
@@ -25,7 +25,7 @@ export const uploadProductImages = multer({
   storage,
   fileFilter,
   limits: {
-    fileSize: 5 * 1024 * 1024, 
-    files: 5, 
+    fileSize: 5 * 1024 * 1024,
+    files: 5,
   },
 }).array('images', 5);

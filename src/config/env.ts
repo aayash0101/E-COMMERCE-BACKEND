@@ -20,7 +20,7 @@ function validateEnv(): void {
   if (missing.length > 0) {
     throw new Error(
       `Missing required environment variables: ${missing.join(', ')}. ` +
-        `Check your .env file against .env.example.`
+      `Check your .env file against .env.example.`
     );
   }
 }
@@ -39,4 +39,7 @@ export const env = {
     refreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN as string,
   },
   clientUrl: process.env.CLIENT_URL as string,
+  cloudinaryCloudName: process.env.CLOUDINARY_CLOUD_NAME!,
+  cloudinaryApiKey: process.env.CLOUDINARY_API_KEY!,
+  cloudinaryApiSecret: process.env.CLOUDINARY_API_SECRET!,
 } as const;
