@@ -4,7 +4,6 @@ import cookieParser from 'cookie-parser';
 import { env } from '@config/env';
 import { errorMiddleware } from '@middlewares/error.middleware';
 import { ApiError } from '@utils/ApiError';
-import path from 'path';
 import authRoutes from '@modules/auth/auth.routes';
 import productRoutes from '@modules/products/product.routes';
 import vendorRoutes from '@modules/vendors/vendor.routes';
