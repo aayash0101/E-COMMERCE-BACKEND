@@ -54,13 +54,15 @@ export const productService = {
 
   async list(filters: ProductFilters, pagination: PaginationOptions) {
     const { products, total } = await productRepository.findWithFilters(filters, pagination);
+    const page = Number(pagination.page);
+    const limit = Number(pagination.limit);
     return {
       products,
       pagination: {
-        page: pagination.page,
-        limit: pagination.limit,
+        page,
+        limit,
         total,
-        totalPages: Math.ceil(total / pagination.limit),
+        totalPages: Math.ceil(total / limit),
       },
     };
   },
