@@ -1,9 +1,7 @@
 import { Schema, model, Document, Types } from 'mongoose';
 import { baseSchemaOptions } from './base.schema';
-
 export type PaymentStatus = 'pending' | 'paid' | 'failed' | 'refunded';
 export type OrderItemStatus = 'pending' | 'shipped' | 'delivered' | 'cancelled';
-
 interface IOrderItem {
   _id?: Types.ObjectId;
   productId: Types.ObjectId;
@@ -13,7 +11,6 @@ interface IOrderItem {
   quantity: number;
   itemStatus: OrderItemStatus;
 }
-
 interface IShippingAddress {
   fullName: string;
   phone: string;
@@ -23,7 +20,6 @@ interface IShippingAddress {
   postalCode: string;
   country: string;
 }
-
 export interface IOrder extends Document {
   _id: Types.ObjectId;
   customerId: Types.ObjectId;
@@ -32,10 +28,11 @@ export interface IOrder extends Document {
   totalAmount: number;
   paymentStatus: PaymentStatus;
   paymentMethod: string;
+  cancellationReason?: string;
+  cancelledAt?: Date;
   createdAt: Date;
   updatedAt: Date;
 }
-
 const orderItemSchema = new Schema<IOrderItem>(
   {
     productId: { type: Schema.Types.ObjectId, ref: 'Product', required: true },
@@ -51,7 +48,6 @@ const orderItemSchema = new Schema<IOrderItem>(
   },
   { _id: true } 
 );
-
 const shippingAddressSchema = new Schema<IShippingAddress>(
   {
     fullName: { type: String, required: true },
@@ -64,7 +60,6 @@ const shippingAddressSchema = new Schema<IShippingAddress>(
   },
   { _id: false }
 );
-
 const orderSchema = new Schema<IOrder>(
   {
     customerId: {
@@ -98,8 +93,14 @@ const orderSchema = new Schema<IOrder>(
       type: String,
       required: true,
     },
+    cancellationReason: {
+      type: String,
+      trim: true,
+    },
+    cancelledAt: {
+      type: Date,
+    },
   },
   baseSchemaOptions
 );
-
 export const Order = model<IOrder>('Order', orderSchema);
