@@ -7,8 +7,12 @@ async function bootstrap(): Promise<void> {
 
   const app = createApp();
 
-  const server = app.listen(env.port, () => {
-    console.log(`Server running in ${env.nodeEnv} mode on port ${env.port}`);
+  // Render sets PORT dynamically — must use process.env.PORT directly
+  // and bind to 0.0.0.0 so Render can detect the open port
+  const PORT = process.env.PORT ?? '5000';
+
+  const server = app.listen(Number(PORT), '0.0.0.0', () => {
+    console.log(`Server running in ${env.nodeEnv} mode on port ${PORT}`);
   });
 
   process.on('unhandledRejection', (reason) => {
