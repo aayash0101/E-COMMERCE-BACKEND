@@ -29,7 +29,6 @@ export const productController = {
       throw ApiError.badRequest('At least one product image is required');
     }
     const imagePaths = files.map((file) => `/uploads/products/${file.filename}`);
-
     const product = await productService.create(
       req.vendorProfileId as string,
       req.body,
