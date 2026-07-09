@@ -4,10 +4,8 @@ import { protect } from '@middlewares/auth.middleware';
 import { restrictTo } from '@middlewares/restrictTo.middleware';
 import { requireApprovedVendor } from '@middlewares/requireApprovedVendor.middleware';
 import { validate } from '@middlewares/validate.middleware';
-import { placeOrderSchema, updateItemStatusSchema } from './order.validation';
-
+import { placeOrderSchema, updateItemStatusSchema, cancelOrderSchema } from './order.validation';
 const router = Router();
-
 router.post(
     '/',
     protect,
@@ -15,15 +13,12 @@ router.post(
     validate(placeOrderSchema),
     orderController.placeOrder
 );
-
-
 router.get(
     '/',
     protect,
     restrictTo('customer'),
     orderController.getMyOrders
 );
-
 router.get(
     '/vendor/mine',
     protect,
@@ -31,7 +26,13 @@ router.get(
     requireApprovedVendor,
     orderController.getVendorOrders
 );
-
+router.put(
+    '/:id/cancel',
+    protect,
+    restrictTo('customer'),
+    validate(cancelOrderSchema),
+    orderController.cancelOrder
+);
 router.put(
     '/:id/items/:itemId',
     protect,
@@ -40,11 +41,9 @@ router.put(
     validate(updateItemStatusSchema),
     orderController.updateItemStatus
 );
-
 router.get(
     '/:id',
     protect,
     orderController.getOrderById
 );
-
 export default router;

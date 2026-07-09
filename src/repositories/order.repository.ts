@@ -1,5 +1,4 @@
 import { Order, IOrder, PaymentStatus } from '@models/order.model';
-
 interface CreateOrderInput {
   customerId: string;
   items: {
@@ -21,37 +20,31 @@ interface CreateOrderInput {
   totalAmount: number;
   paymentMethod: string;
 }
-
 export const orderRepository = {
   async create(data: CreateOrderInput): Promise<IOrder> {
     return Order.create(data);
   },
-
   async findById(id: string): Promise<IOrder | null> {
     return Order.findById(id)
       .populate('customerId', 'name email')
       .populate('items.productId', 'name images')
       .exec();
   },
-
   async findByIdRaw(id: string): Promise<IOrder | null> {
     return Order.findById(id).exec();
   },
-
   async findByCustomerId(customerId: string): Promise<IOrder[]> {
     return Order.find({ customerId })
       .sort('-createdAt')
       .populate('items.productId', 'name images')
       .exec();
   },
-
   async findByVendorId(vendorId: string): Promise<IOrder[]> {
     return Order.find({ 'items.vendorId': vendorId })
       .sort('-createdAt')
       .populate('customerId', 'name email')
       .exec();
   },
-
   async updatePaymentStatus(
     id: string,
     status: PaymentStatus
@@ -62,7 +55,6 @@ export const orderRepository = {
       { new: true }
     ).exec();
   },
-
   async updateItemStatus(
     orderId: string,
     itemId: string,
@@ -73,5 +65,20 @@ export const orderRepository = {
       { $set: { 'items.$.itemStatus': status } },
       { new: true }
     ).exec();
+  },
+  async cancelOrder(
+    orderId: string,
+    reason: string,
+    paymentStatus?: PaymentStatus
+  ): Promise<IOrder | null> {
+    const update: Record<string, unknown> = {
+      'items.$[].itemStatus': 'cancelled',
+      cancellationReason: reason,
+      cancelledAt: new Date(),
+    };
+    if (paymentStatus) {
+      update.paymentStatus = paymentStatus;
+    }
+    return Order.findByIdAndUpdate(orderId, { $set: update }, { new: true }).exec();
   },
 };

@@ -27,4 +27,14 @@ export const updateItemStatusSchema = z.object({
     }),
 });
 
+export const cancelOrderSchema = z.object({
+    body: z.object({
+        reason: z.string().trim().min(3, 'Please provide a reason').max(500),
+    }),
+    params: z.object({
+        id: z.string().regex(/^[0-9a-fA-F]{24}$/, 'Invalid order ID'),
+    }),
+});
+
 export type PlaceOrderInput = z.infer<typeof placeOrderSchema>['body'];
+export type CancelOrderInput = z.infer<typeof cancelOrderSchema>['body'];
