@@ -1,6 +1,7 @@
 import { orderRepository } from '@repositories/order.repository';
 import { cartRepository } from '@repositories/cart.repository';
 import { productRepository } from '@repositories/product.repository';
+import { esewaService } from '@modules/payments/esewa.service';
 import { ApiError } from '@utils/ApiError';
 import { IOrder } from '@models/order.model';
 import { IProduct } from '@models/product.model';
@@ -90,6 +91,54 @@ export const orderService = {
             orderId,
             reason,
             refundNeeded ? 'refunded' : undefined
+        );
+        if (!updated) throw ApiError.notFound('Order not found');
+        return updated;
+    },
+    async initiateEsewaPayment(orderId: string, userId: string) {
+        const order = await orderRepository.findByIdRaw(orderId);
+        if (!order) throw ApiError.notFound('Order not found');
+
+        if (order.customerId.toString() !== userId) {
+            throw ApiError.forbidden('You do not have access to this order');
+        }
+        if (order.paymentMethod !== 'esewa') {
+            throw ApiError.badRequest('This order is not set up for eSewa payment');
+        }
+        if (order.paymentStatus === 'paid') {
+            throw ApiError.badRequest('This order has already been paid');
+        }
+
+        // Unique per attempt — allows retrying a failed payment on the same order
+        const transactionUuid = `${orderId}-${Date.now()}`;
+        await orderRepository.setTransactionUuid(orderId, transactionUuid);
+
+        return esewaService.buildPaymentForm(order.totalAmount, transactionUuid);
+    },
+    async verifyEsewaPayment(base64Data: string): Promise<IOrder> {
+        const decoded = esewaService.decodeAndVerifyCallback(base64Data);
+        if (!decoded) {
+            throw ApiError.badRequest('Invalid or tampered payment response');
+        }
+
+        const order = await orderRepository.findByTransactionUuid(decoded.transaction_uuid);
+        if (!order) {
+            throw ApiError.notFound('Order not found for this transaction');
+        }
+
+        const status = await esewaService.checkTransactionStatus(
+            decoded.total_amount,
+            decoded.transaction_uuid
+        );
+
+        if (status !== 'COMPLETE') {
+            await orderRepository.updatePaymentStatus(order._id.toString(), 'failed');
+            throw ApiError.badRequest('Payment was not completed');
+        }
+
+        const updated = await orderRepository.updatePaymentStatus(
+            order._id.toString(),
+            'paid'
         );
         if (!updated) throw ApiError.notFound('Order not found');
         return updated;
