@@ -28,6 +28,7 @@ export interface IOrder extends Document {
   totalAmount: number;
   paymentStatus: PaymentStatus;
   paymentMethod: string;
+  transactionUuid?: string;
   cancellationReason?: string;
   cancelledAt?: Date;
   createdAt: Date;
@@ -92,6 +93,10 @@ const orderSchema = new Schema<IOrder>(
     paymentMethod: {
       type: String,
       required: true,
+    },
+    transactionUuid: {
+      type: String,
+      index: true,
     },
     cancellationReason: {
       type: String,
