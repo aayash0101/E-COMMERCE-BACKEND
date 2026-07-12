@@ -4,7 +4,12 @@ import { protect } from '@middlewares/auth.middleware';
 import { restrictTo } from '@middlewares/restrictTo.middleware';
 import { requireApprovedVendor } from '@middlewares/requireApprovedVendor.middleware';
 import { validate } from '@middlewares/validate.middleware';
-import { placeOrderSchema, updateItemStatusSchema, cancelOrderSchema } from './order.validation';
+import {
+    placeOrderSchema,
+    updateItemStatusSchema,
+    cancelOrderSchema,
+    esewaVerifySchema,
+} from './order.validation';
 const router = Router();
 router.post(
     '/',
@@ -32,6 +37,19 @@ router.put(
     restrictTo('customer'),
     validate(cancelOrderSchema),
     orderController.cancelOrder
+);
+router.post(
+    '/:id/esewa/initiate',
+    protect,
+    restrictTo('customer'),
+    orderController.initiateEsewaPayment
+);
+router.post(
+    '/esewa/verify',
+    protect,
+    restrictTo('customer'),
+    validate(esewaVerifySchema),
+    orderController.verifyEsewaPayment
 );
 router.put(
     '/:id/items/:itemId',
