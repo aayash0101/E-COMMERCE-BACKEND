@@ -36,5 +36,12 @@ export const cancelOrderSchema = z.object({
     }),
 });
 
+export const esewaVerifySchema = z.object({
+    body: z.object({
+        data: z.string().min(1, 'Missing eSewa response data'),
+    }),
+});
+
 export type PlaceOrderInput = z.infer<typeof placeOrderSchema>['body'];
 export type CancelOrderInput = z.infer<typeof cancelOrderSchema>['body'];
+export type EsewaVerifyInput = z.infer<typeof esewaVerifySchema>['body'];
