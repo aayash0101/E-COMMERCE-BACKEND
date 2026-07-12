@@ -33,6 +33,9 @@ export const orderRepository = {
   async findByIdRaw(id: string): Promise<IOrder | null> {
     return Order.findById(id).exec();
   },
+  async findByTransactionUuid(transactionUuid: string): Promise<IOrder | null> {
+    return Order.findOne({ transactionUuid }).exec();
+  },
   async findByCustomerId(customerId: string): Promise<IOrder[]> {
     return Order.find({ customerId })
       .sort('-createdAt')
@@ -44,6 +47,9 @@ export const orderRepository = {
       .sort('-createdAt')
       .populate('customerId', 'name email')
       .exec();
+  },
+  async setTransactionUuid(id: string, transactionUuid: string): Promise<IOrder | null> {
+    return Order.findByIdAndUpdate(id, { transactionUuid }, { new: true }).exec();
   },
   async updatePaymentStatus(
     id: string,
