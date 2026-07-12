@@ -30,6 +30,17 @@ export const orderController = {
             data: { order },
         });
     }),
+    initiateEsewaPayment: asyncHandler(async (req: Request, res: Response) => {
+        const result = await orderService.initiateEsewaPayment(
+            req.params.id,
+            req.user!.userId
+        );
+        res.status(200).json({ success: true, data: result });
+    }),
+    verifyEsewaPayment: asyncHandler(async (req: Request, res: Response) => {
+        const order = await orderService.verifyEsewaPayment(req.body.data);
+        res.status(200).json({ success: true, data: { order } });
+    }),
     getVendorOrders: asyncHandler(async (req: Request, res: Response) => {
         const orders = await orderService.getVendorOrders(
             req.vendorProfileId as string
