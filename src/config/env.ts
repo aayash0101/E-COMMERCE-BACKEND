@@ -15,6 +15,11 @@ const requiredEnvVars = [
   'CLOUDINARY_CLOUD_NAME',
   'CLOUDINARY_API_KEY',
   'CLOUDINARY_API_SECRET',
+  'ESEWA_SECRET_KEY',
+  'ESEWA_MERCHANT_CODE',
+  'ESEWA_PAYMENT_URL',
+  'ESEWA_VERIFY_URL',
+  'FRONTEND_URL',
 ] as const;
 
 function validateEnv(): void {
@@ -42,7 +47,14 @@ export const env = {
     refreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN as string,
   },
   clientUrl: process.env.CLIENT_URL as string,
+  frontendUrl: process.env.FRONTEND_URL as string,
   cloudinaryCloudName: process.env.CLOUDINARY_CLOUD_NAME!,
   cloudinaryApiKey: process.env.CLOUDINARY_API_KEY!,
   cloudinaryApiSecret: process.env.CLOUDINARY_API_SECRET!,
+  esewa: {
+    secretKey: process.env.ESEWA_SECRET_KEY as string,
+    merchantCode: process.env.ESEWA_MERCHANT_CODE as string,
+    paymentUrl: process.env.ESEWA_PAYMENT_URL as string,
+    verifyUrl: process.env.ESEWA_VERIFY_URL as string,
+  },
 } as const;
