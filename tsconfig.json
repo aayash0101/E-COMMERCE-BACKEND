@@ -6,6 +6,8 @@
     "outDir": "./dist",
     "rootDir": "./src",
 
+    "ignoreDeprecations": "6.0",
+
     "strict": true,
     "noImplicitAny": true,
     "strictNullChecks": true,
