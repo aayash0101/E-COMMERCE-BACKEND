@@ -1,4 +1,5 @@
 import { Order, IOrder, PaymentStatus } from '@models/order.model';
+
 interface CreateOrderInput {
   customerId: string;
   items: {
@@ -20,37 +21,65 @@ interface CreateOrderInput {
   totalAmount: number;
   paymentMethod: string;
 }
+
 export const orderRepository = {
   async create(data: CreateOrderInput): Promise<IOrder> {
     return Order.create(data);
   },
+
   async findById(id: string): Promise<IOrder | null> {
     return Order.findById(id)
       .populate('customerId', 'name email')
       .populate('items.productId', 'name images')
       .exec();
   },
+
   async findByIdRaw(id: string): Promise<IOrder | null> {
     return Order.findById(id).exec();
   },
+
+  
   async findByTransactionUuid(transactionUuid: string): Promise<IOrder | null> {
     return Order.findOne({ transactionUuid }).exec();
   },
+
+  async setTransactionUuid(
+    id: string,
+    transactionUuid: string
+  ): Promise<IOrder | null> {
+    return Order.findByIdAndUpdate(
+      id,
+      { transactionUuid },
+      { new: true }
+    ).exec();
+  },
+
+  async findByKhaltiPidx(pidx: string): Promise<IOrder | null> {
+    return Order.findOne({ khaltiPidx: pidx }).exec();
+  },
+
+  async setKhaltiPidx(id: string, pidx: string): Promise<IOrder | null> {
+    return Order.findByIdAndUpdate(
+      id,
+      { khaltiPidx: pidx },
+      { new: true }
+    ).exec();
+  },
+
   async findByCustomerId(customerId: string): Promise<IOrder[]> {
     return Order.find({ customerId })
       .sort('-createdAt')
       .populate('items.productId', 'name images')
       .exec();
   },
+
   async findByVendorId(vendorId: string): Promise<IOrder[]> {
     return Order.find({ 'items.vendorId': vendorId })
       .sort('-createdAt')
       .populate('customerId', 'name email')
       .exec();
   },
-  async setTransactionUuid(id: string, transactionUuid: string): Promise<IOrder | null> {
-    return Order.findByIdAndUpdate(id, { transactionUuid }, { new: true }).exec();
-  },
+
   async updatePaymentStatus(
     id: string,
     status: PaymentStatus
@@ -61,6 +90,7 @@ export const orderRepository = {
       { new: true }
     ).exec();
   },
+
   async updateItemStatus(
     orderId: string,
     itemId: string,
@@ -72,6 +102,7 @@ export const orderRepository = {
       { new: true }
     ).exec();
   },
+
   async cancelOrder(
     orderId: string,
     reason: string,
@@ -85,6 +116,10 @@ export const orderRepository = {
     if (paymentStatus) {
       update.paymentStatus = paymentStatus;
     }
-    return Order.findByIdAndUpdate(orderId, { $set: update }, { new: true }).exec();
+    return Order.findByIdAndUpdate(
+      orderId,
+      { $set: update },
+      { new: true }
+    ).exec();
   },
 };
