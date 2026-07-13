@@ -2,7 +2,6 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-
 const requiredEnvVars = [
   'PORT',
   'NODE_ENV',
@@ -20,6 +19,9 @@ const requiredEnvVars = [
   'ESEWA_PAYMENT_URL',
   'ESEWA_VERIFY_URL',
   'FRONTEND_URL',
+  'KHALTI_SECRET_KEY',
+  'KHALTI_INITIATE_URL',
+  'KHALTI_VERIFY_URL',
 ] as const;
 
 function validateEnv(): void {
@@ -34,7 +36,6 @@ function validateEnv(): void {
 }
 
 validateEnv();
-
 
 export const env = {
   port: Number(process.env.PORT),
@@ -56,5 +57,10 @@ export const env = {
     merchantCode: process.env.ESEWA_MERCHANT_CODE as string,
     paymentUrl: process.env.ESEWA_PAYMENT_URL as string,
     verifyUrl: process.env.ESEWA_VERIFY_URL as string,
+  },
+  khalti: {
+    secretKey: process.env.KHALTI_SECRET_KEY as string,
+    initiateUrl: process.env.KHALTI_INITIATE_URL as string,
+    verifyUrl: process.env.KHALTI_VERIFY_URL as string,
   },
 } as const;
