@@ -46,8 +46,6 @@ router.post(
 );
 router.post(
     '/esewa/verify',
-    protect,
-    restrictTo('customer'),
     validate(esewaVerifySchema),
     orderController.verifyEsewaPayment
 );
